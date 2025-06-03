@@ -48,8 +48,11 @@ def generate_math_question():
         question = parts[0].replace('QUESTION: ', '')
         answer = parts[1].replace('ANSWER: ', '')
         return question, answer
-    except Exception as e:
+    except (openai.OpenAIError, ValueError) as e:
         print(f"Error generating question: {e}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"Unexpected error: {e}")
         sys.exit(1)
 
 def explain_answer(user_answer, correct_answer, question):
