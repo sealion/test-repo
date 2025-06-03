@@ -1,8 +1,15 @@
-from dotenv import load_dotenv
-import openai
+"""
+Interactive Math Practice Application
+
+This module provides an interactive math practice app to
+generate questions and provide feedback on user answers.
+"""
 import os
 import random
 import sys
+
+from dotenv import load_dotenv
+import openai
 
 # Load the environment variables
 load_dotenv()
