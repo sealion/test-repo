@@ -13,7 +13,15 @@ openai.base_url = os.getenv('BASE_URL', 'https://api.openai.com/v1')
 MODEL_NAME = os.getenv('MODEL_NAME', 'gpt-3.5-turbo')
 
 def generate_math_question():
-    """Generate a math question using the AI model"""
+    """
+    Generates a random simple math question and its correct answer using the AI model.
+    
+    Returns:
+        A tuple containing the generated question string and its correct answer string.
+    
+    Raises:
+        Exits the program if an error occurs during question generation or response parsing.
+    """
     try:
         # Add a random seed to prevent caching
         random_seed = random.randint(1, 10000)
@@ -43,7 +51,19 @@ def generate_math_question():
         sys.exit(1)
 
 def explain_answer(user_answer, correct_answer, question):
-    """Get AI explanation for the answer"""
+    """
+    Requests an AI-generated explanation evaluating the user's answer to a math question.
+    
+    Given the user's answer, the correct answer, and the question, this function queries the AI to provide an encouraging and helpful explanation indicating whether the user's answer is correct and why.
+    
+    Args:
+        user_answer: The answer provided by the user.
+        correct_answer: The correct answer to the question.
+        question: The math question being answered.
+    
+    Returns:
+        A string containing the AI-generated explanation or an error message if the request fails.
+    """
     try:
         response = openai.chat.completions.create(
             model=MODEL_NAME,
@@ -63,6 +83,11 @@ def explain_answer(user_answer, correct_answer, question):
         return f"Error getting explanation: {e}"
 
 def main():
+    """
+    Runs the interactive math practice session in the command-line interface.
+    
+    Prompts the user with AI-generated math questions, accepts answers, and provides AI-generated feedback. The session continues until the user enters '/bye' or submits an empty response.
+    """
     print(f"Welcome to Math Practice! Using model: {MODEL_NAME}")
     print("Press Enter without input or type '/bye' to exit")
 
