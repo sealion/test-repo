@@ -7,10 +7,13 @@ import sys
 # Load the environment variables
 load_dotenv()
 
-# Configure OpenAI client
-openai.api_key = os.getenv('API_KEY')
-openai.base_url = os.getenv('BASE_URL', 'https://api.openai.com/v1/')
+# Configure the OpenAI client
+client = openai.OpenAI(
+    api_key=os.getenv('API_KEY'),
+    base_url=os.getenv('BASE_URL', 'https://api.openai.com/v1/')
+)
 MODEL_NAME = os.getenv('MODEL_NAME', 'gpt-3.5-turbo')
+
 
 def generate_math_question():
     """Generate a math question using the AI model"""
@@ -18,7 +21,7 @@ def generate_math_question():
         # Add a random seed to prevent caching
         random_seed = random.randint(1, 10000)
 
-        response = openai.chat.completions.create(
+        response = client.chat.completions.create(
             model=MODEL_NAME,
             temperature=1.0,
             messages=[
@@ -45,7 +48,7 @@ def generate_math_question():
 def explain_answer(user_answer, correct_answer, question):
     """Get AI explanation for the answer"""
     try:
-        response = openai.chat.completions.create(
+        response = client.chat.completions.create(
             model=MODEL_NAME,
             messages=[
                 {
