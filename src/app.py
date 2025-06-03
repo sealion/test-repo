@@ -45,8 +45,17 @@ def generate_math_question():
 
         content = response.choices[0].message.content
         parts = content.split('\n')
-        question = parts[0].replace('QUESTION: ', '')
-        answer = parts[1].replace('ANSWER: ', '')
+        if len(parts) < 2:
+            raise ValueError("Invalid response format from AI")
+        
+        question_line = next((line for line in parts if line.startswith('QUESTION:')), None)
+        answer_line = next((line for line in parts if line.startswith('ANSWER:')), None)
+        
+        if not question_line or not answer_line:
+            raise ValueError("Missing QUESTION or ANSWER in response")
+            
+        question = question_line.replace('QUESTION: ', '').strip()
+        answer = answer_line.replace('ANSWER: ', '').strip()
         return question, answer
     except (openai.OpenAIError, ValueError) as e:
         print(f"Error generating question: {e}")
