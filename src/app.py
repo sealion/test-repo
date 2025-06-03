@@ -9,7 +9,7 @@ load_dotenv()
 
 # Configure OpenAI client
 openai.api_key = os.getenv('API_KEY')
-openai.base_url = os.getenv('BASE_URL', 'https://api.openai.com/v1')
+openai.base_url = os.getenv('BASE_URL', 'https://api.openai.com/v1/')
 MODEL_NAME = os.getenv('MODEL_NAME', 'gpt-3.5-turbo')
 
 def generate_math_question():
