@@ -81,6 +81,8 @@ def explain_answer(user_answer, correct_answer, question):
             ]
         )
         return response.choices[0].message.content
+    except openai.OpenAIError as e:
+        return f"OpenAI API error: {e}"
     except Exception as e:
         return f"Error getting explanation: {e}"
 
