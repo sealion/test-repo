@@ -1,32 +1,34 @@
-from dotenv import load_dotenv
-import openai
+"""
+Interactive Math Practice Application
+
+This module provides an interactive math practice app to
+generate questions and provide feedback on user answers.
+"""
 import os
 import random
 import sys
 
+from dotenv import load_dotenv
+import openai
+
 # Load the environment variables
 load_dotenv()
 
-# Configure OpenAI client
-openai.api_key = os.getenv('API_KEY')
-openai.base_url = os.getenv('BASE_URL', 'https://api.openai.com/v1')
+# Configure the OpenAI client
+client = openai.OpenAI(
+    api_key=os.getenv('API_KEY'),
+    base_url=os.getenv('BASE_URL', 'https://api.openai.com/v1/')
+)
 MODEL_NAME = os.getenv('MODEL_NAME', 'gpt-3.5-turbo')
 
+
 def generate_math_question():
-    """
-    Generates a random simple math question and its correct answer using the AI model.
-    
-    Returns:
-        A tuple containing the generated question string and its correct answer string.
-    
-    Raises:
-        Exits the program if an error occurs during question generation or response parsing.
-    """
+    """Generate a math question using the AI model"""
     try:
         # Add a random seed to prevent caching
         random_seed = random.randint(1, 10000)
 
-        response = openai.chat.completions.create(
+        response = client.chat.completions.create(
             model=MODEL_NAME,
             temperature=1.0,
             messages=[
@@ -43,29 +45,29 @@ def generate_math_question():
 
         content = response.choices[0].message.content
         parts = content.split('\n')
-        question = parts[0].replace('QUESTION: ', '')
-        answer = parts[1].replace('ANSWER: ', '')
+        if len(parts) < 2:
+            raise ValueError("Invalid response format from AI")
+        
+        question_line = next((line for line in parts if line.startswith('QUESTION:')), None)
+        answer_line = next((line for line in parts if line.startswith('ANSWER:')), None)
+        
+        if not question_line or not answer_line:
+            raise ValueError("Missing QUESTION or ANSWER in response")
+            
+        question = question_line.replace('QUESTION: ', '').strip()
+        answer = answer_line.replace('ANSWER: ', '').strip()
         return question, answer
-    except Exception as e:
+    except (openai.OpenAIError, ValueError) as e:
         print(f"Error generating question: {e}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"Unexpected error: {e}")
         sys.exit(1)
 
 def explain_answer(user_answer, correct_answer, question):
-    """
-    Requests an AI-generated explanation evaluating the user's answer to a math question.
-    
-    Given the user's answer, the correct answer, and the question, this function queries the AI to provide an encouraging and helpful explanation indicating whether the user's answer is correct and why.
-    
-    Args:
-        user_answer: The answer provided by the user.
-        correct_answer: The correct answer to the question.
-        question: The math question being answered.
-    
-    Returns:
-        A string containing the AI-generated explanation or an error message if the request fails.
-    """
+    """Get AI explanation for the answer"""
     try:
-        response = openai.chat.completions.create(
+        response = client.chat.completions.create(
             model=MODEL_NAME,
             messages=[
                 {
@@ -79,15 +81,12 @@ def explain_answer(user_answer, correct_answer, question):
             ]
         )
         return response.choices[0].message.content
+    except openai.OpenAIError as e:
+        return f"OpenAI API error: {e}"
     except Exception as e:
         return f"Error getting explanation: {e}"
 
 def main():
-    """
-    Runs the interactive math practice session in the command-line interface.
-    
-    Prompts the user with AI-generated math questions, accepts answers, and provides AI-generated feedback. The session continues until the user enters '/bye' or submits an empty response.
-    """
     print(f"Welcome to Math Practice! Using model: {MODEL_NAME}")
     print("Press Enter without input or type '/bye' to exit")
 
